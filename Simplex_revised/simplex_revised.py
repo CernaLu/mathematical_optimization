@@ -17,9 +17,9 @@ def incrementedTableu(table, m, n):
 def writeTableu(tableu, n, mess):
     header = mess + ' ' + int(9*n)*'_' + '\n'
     footer = int(12*n) * '-' + '\n'
-    for row in tableu:
-            np.savetxt('output.txt', tableu, fmt='%5s',\
-            header=header, footer=footer)
+    #for row in tableu:
+    np.savetxt('output.txt', tableu, fmt='%5s',\
+    header=header, footer=footer)
 
     return
 
@@ -29,10 +29,13 @@ def opt_test(Z_vect):
             return False
     
     return True
-
-def eta_vect(tableu, eta_col, m, n):
-       eta = np.stack( for row in tableu: tableu[row][int(eta_col)] )
+def eta_vect(tableu, eta, eta_col, m):
+    for row in range(int(m)):
+        eta = tableu[row][int(eta_col)]  
         
+    np.stack( eta, axis=-1)
+    
+    return
 
 def find_pivot(tableu, m, n):
     t = opt_test(tableu[0])
@@ -65,9 +68,8 @@ def find_pivot(tableu, m, n):
                 #print('test = ', test)
             i = False              
     
-    eta_vect(tableu, col, m, n)
+    eta_vect(tableu, eta, col, m)
     return p
-
 table = np.ndarray( (20,20) )
 
 table = np.loadtxt("file.txt", dtype=float, comments='#', delimiter=" ")
@@ -83,7 +85,9 @@ pivot = find_pivot(tableu, m, n)
 if pivot == 0:
     sys.exit('Z is optimal')
 
-while pivot =! 0:
+while pivot != 0:
+    
+    
 #size = np.fromfile("file.txt", dtype = float, count = 2, sep = " ")
 #tableu = np.fromfile("file.txt", dtype = float, count = -1, sep = " ")
 #tableu = tableu[2:]
