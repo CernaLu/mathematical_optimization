@@ -3,6 +3,13 @@ import numpy as np
 from fractions import Fraction
 import argparse as parse
 
+# It's important not to stay in an infinit cycle that could
+    # happen if there are repeated pivots. Code should be
+    # able to identify and pick the next pivot, even if it
+    # has the same value
+
+# Also, it is of importance 
+
 def incrementedTableu(table, m, n):
     b = np.hsplit(table, int(n))
     b = b[int(n)-1]
@@ -29,19 +36,8 @@ def opt_test(Z_vect):
             return False
     
     return True
-def eta_vect(tableu, eta, eta_col, m):
-    for row in range(int(m)):
-        eta = tableu[row][int(eta_col)]  
-        
-    np.stack( eta, axis=-1)
-    
-    return
 
-def find_pivot(tableu, m, n):
-    t = opt_test(tableu[0])
-    if t == True:
-        return 0 # MUST CHANGE THIS FOR A FINALIZATION ROUTINE
-    
+def pivot(tableu, m, n, col, p_row):
     table = tableu[0]
     table = table[:-1]
     col = np.argmin(table)  
@@ -60,16 +56,45 @@ def find_pivot(tableu, m, n):
                 #print('p =', p)
                 test = buff_test
                 #print('test = ', test)
+                p_row = row
             elif buff_test < test:
                 #print(buff_test, '<', test)
                 p = buffer
                 #print('Now:\np = ',p)
                 test = buff_test
                 #print('test = ', test)
-            i = False              
-    
-    eta_vect(tableu, eta, col, m)
+                p_row = row
+            i = False
+
     return p
+    
+def eta_vect(tableu, m, n, p_row, col, p):
+    eta_.ndarray( (4,1) )
+    for row in range(int(m))
+        if row == int(p_row):
+            a = int(tableu[row][int(col)])
+            eta_[int(row)] = p**(-1)
+        else:
+            a = int(tableu[row][int(col)])
+            eta_[int(row)] = ( a ) / (- p)
+
+    return
+    
+def Simplex(tableu, m, n):
+    t = opt_test(tableu[0])
+    if t == True:
+        return 0 # MUST CHANGE THIS FOR A FINALIZATION ROUTINE
+    
+    p_row = 0 # If it stays a 0, then no pivot was found
+    col = 0
+    p_value = pivot(tableu, m, n, p_row, col)
+    eta_vect(tableu, m, n, p_row, col, p_value)
+    
+    
+    
+    return
+
+################################## MAIN PROGRAM
 table = np.ndarray( (20,20) )
 
 table = np.loadtxt("file.txt", dtype=float, comments='#', delimiter=" ")
@@ -80,14 +105,10 @@ tableu = incrementedTableu(table, m, n)
 
 writeTableu(tableu, n, "\nIteration 0")
 
-n = (n-1) + m #Now m has the incremented tableu size, not the original
-pivot = find_pivot(tableu, m, n)
-if pivot == 0:
-    sys.exit('Z is optimal')
+n = (n-1) + m #Now n has the incremented tableu size, not the original
 
-while pivot != 0:
-    
-    
+Simplex(tableu, m, n)
+
 #size = np.fromfile("file.txt", dtype = float, count = 2, sep = " ")
 #tableu = np.fromfile("file.txt", dtype = float, count = -1, sep = " ")
 #tableu = tableu[2:]

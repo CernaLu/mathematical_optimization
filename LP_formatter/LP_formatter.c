@@ -1,13 +1,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int main(int argc, char **argv)
+int main( void )
 {
 int n, N, c, m;
+int obj;
 char str[256]; 
+char opt[100];                      
+char scp[100];
+char del[50];
 FILE *dst;
 
-dst = fopen(argv[1], "w");
+snprintf(del, sizeof(del), "> sol.txt");
+system(del);
+
+dst = fopen("src.lp", "w");
 
 if(dst == NULL)
   {
@@ -15,14 +22,18 @@ if(dst == NULL)
     "in 'src_File_manage()'.\n\n");
     exit(1);
   }
-
+printf("1) Maximize\n2) Minimize\n\n");
+scanf("%d", &obj);
 printf("\n\nNumber of variables in object equation?: ");
 scanf("%d", &N);
 printf("\nEnter the obj equ coefficients in order followed by an ENTER:\n");
 
 // TO FILE #####################
-fprintf(dst, "Maximize\n");
-fprintf(dst, "obj: ");
+if (obj == 1)
+  fprintf(dst, "Maximize\n");
+if (obj == 2)
+  fprintf(dst, "Minimize\n");
+fprintf(dst, " obj: ");
 for(int i = 1; i <= N; i++)
   {
   scanf("%d", &c);
@@ -57,10 +68,15 @@ for(int i = 0; i <= m; i++)
   if (i>=1)
     fprintf(dst, " %s", str);
   }
-fprintf(dst, "%cGeneral\n", 37);
-fprintf(dst, "%c x4\n", 37);
 fprintf(dst, "END");
 //##############################
 
+snprintf(scp, sizeof(scp), "./scip -f src.lp -l sol.txt");
+    system(scp);
+    
+snprintf(opt, sizeof(opt), "python read_solution.py");
+    system(opt);
+
+fclose(dst);
 return(0);
 }
