@@ -141,13 +141,15 @@ def matmul(A, B):
     a, b = A.shape, B.shape
     m, r, n = a[0], a[1], b[1]
     c = np.ndarray( [m,n] )
+    c = c.astype('object')
     
     for i in range(m):
         for j in range(n):
+            c[i][j] = 0
             for k in range(r):
                 c[i][j] += A[i][k] * B[k][j]
-                c[i][j] = round(c[i][j], 2)
-                c[i][j] = Rational(c[i][j])
+                #c[i][j] = round(c[i][j], 2)
+                c[i][j] = nsimplify((c[i][j]), rational=True)
     
     return c
 
