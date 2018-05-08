@@ -5,7 +5,8 @@ import os
 from sympy import *
 from decimal import Decimal
 
-# CHECK ITERATION 1, IT'S WRONG
+# HAVE TO PRINT eta*tableu IN OUTPUT.TXT
+# ALSO think about how to print variables value
 
     # It's important not to stay in an infinit cycle that could
     # happen if there are repeated pivots. Code should be
@@ -75,7 +76,7 @@ def writeTableu(tableu, m, n, mess):
     dst.close() 
     return
 
-def opt_test(Z_vect):
+def opt_test(Z_vect): #We should stop when all coff in Z are > 0
     for test in Z_vect:
         if test < 0:
             return False
@@ -87,28 +88,18 @@ def pivot(tableu, m, n):
     table = table[:-1]
     p_col = np.argmin(table)  
     i = True
-    print (tableu)
     for row in range(1, int(m), 1):
-        #print('\niteration ',row, '\n')
         buffer = tableu[row][int(p_col)]
-        #print('buff = ', buffer)
         b = tableu[row][int(n)-1]
-        #print('b = ',b)
         if (buffer > 0):
             buff_test = b / buffer
-            #print('buffer test = ', buff_test)
             if i == True:
                 p = buffer
-                #print('p =', p)
                 test = buff_test
-                #print('test = ', test)
                 p_row = row
             elif buff_test < test:
-                #print(buff_test, '<', test)
                 p = buffer
-                #print('Now:\np = ',p)
                 test = buff_test
-                #print('test = ', test)
                 p_row = row
             i = False
     
@@ -129,7 +120,6 @@ def eta_vect(tableu, m, n, p, p_row, p_col):
     return etav
 
 def eta_tableu(etaV, p_row, m):
-    print('m =', m)
     etaM = np.identity( int(m) )
     etaM = etaM.astype('object')
     for row in range(int(m)):
@@ -148,27 +138,31 @@ def matmul(A, B):
             c[i][j] = 0
             for k in range(r):
                 c[i][j] += A[i][k] * B[k][j]
-                #c[i][j] = round(c[i][j], 2)
                 c[i][j] = nsimplify((c[i][j]), rational=True)
     
     return c
 
-def Simplex(tableu, m, n, etav):
-    #change etav declaration to this location
-    t = opt_test(tableu[0])
-    if t == True:
-        return 0 # MUST CHANGE THIS FOR A FINALIZATION ROUTINE
-    
+def Simplex(tableu, m, n, it):
+    etav = np.ndarray( 4 )
     p = pivot(tableu, m, n)
     etaV = eta_vect(tableu, m, n, p[0], p[1], p[2]) #gives eta as a row
-
     etaM = eta_tableu(etaV, p[1], m)
     writeTableu(etaM, m, n, 'eta Tableu')
     etaM = etaM.astype('float')
-    T = matmul(etaM, tableu)
-    writeTableu(T, m, n, 'Iteration 1')
-    
-    return
+    tableu = matmul(etaM, tableu)
+    mess = 'Iteration ' + str(it)
+    writeTableu(tableu, m, n, mess)
+    it += 1
+
+    t = opt_test(tableu[0])
+    if t == False:
+        Simplex(tableu, m, n, it)
+    else:
+        dst = open('output.txt', 'a')
+        Z = tableu[0][int(n)-1]
+        dst.writelines( ('Zopt = ', str(Z)) )
+        dst.close()
+        return 
 
 ################################## MAIN PROGRAM
 os.system('> output.txt')
@@ -179,11 +173,10 @@ m = table[0][0]
 n = table[1][0]
 table = table[2:]
 tableu = incrementedTableu(table, m, n)
-etav = np.ndarray( 4 )
 
 n = (n-1) + m #Now n has the incremented tableu size, not the original
 writeTableu(tableu, m, n, "\nIteration 0")
-Simplex(tableu, m, n, etav)
+Simplex(tableu, m, n, 1)
 
 #size = np.fromfile("file.txt", dtype = float, count = 2, sep = " ")
 #tableu = np.fromfile("file.txt", dtype = float, count = -1, sep = " ")
