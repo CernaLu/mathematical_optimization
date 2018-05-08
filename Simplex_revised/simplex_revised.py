@@ -66,9 +66,8 @@ def writeTableu(tableu, m, n, mess):
     
     header = mess + ' ' + int(9*n)*'_' + '\n'
     footer = int(12*n) * '-' + '\n'
-    #for row in tableu:
     dst = open('output.txt', 'a')
-    np.savetxt(dst, tableu, fmt='%5s', header=header, footer=footer)
+    np.savetxt(dst, tableu, fmt='%5s', delimiter=' ', newline='\n', header=header, footer=footer)
     
     #np.savetxt(dst, tableu, fmt='%5s', header=header, footer=footer)
     #dst = open('output.txt', 'ab')
@@ -138,7 +137,7 @@ def matmul(A, B):
             c[i][j] = 0
             for k in range(r):
                 c[i][j] += A[i][k] * B[k][j]
-                c[i][j] = nsimplify((c[i][j]), rational=True)
+                c[i][j] = nsimplify( (c[i][j]), rational=True )
     
     return c
 
