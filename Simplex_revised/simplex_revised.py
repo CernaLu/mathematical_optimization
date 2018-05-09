@@ -58,24 +58,31 @@ def incrementedTableu(table, m, n):
     return tableu
     
 def writeTableu(tableu, m, n, mess):
-    size = tableu.shape
-    tableu = tableu.astype('object')
-    for i in range(int(size[0])):
-        for j in range(int(size[1])):
-            tableu[i][j] = tableu[i][j]
+    #size = tableu.shape
+    #tableu = tableu.astype('object') #try removing 
+    #for i in range(int(size[0])):
+    #    for j in range(int(size[1])):
+    #        tableu[i][j] = tableu[i][j]
     
     header = mess + ' ' + int(9*n)*'_' + '\n'
     footer = int(12*n) * '-' + '\n'
     dst = open('output.txt', 'a')
     np.savetxt(dst, tableu, fmt='%5s', delimiter=' ', newline='\n', header=header, footer=footer)
     
-    #np.savetxt(dst, tableu, fmt='%5s', header=header, footer=footer)
-    #dst = open('output.txt', 'ab')
-    #dst.writelines( [header, '\n', tableu, '\n', footer] ) #fmt='%5s'
     dst.close() 
     return
 
-def opt_test(Z_vect): #We should stop when all coff in Z are > 0
+def writeprod(etaM, tableu): #Product needs a separation :(
+    header = int(9*n)*'_' + '\n'
+    footer = int(12*n) * '-' + '\n'
+    dst = open('output.txt', 'a')
+    np.savetxt(dst, np.c_[etaM, tableu], fmt='%5s', delimiter=' ', newline='\n', header=header, footer=footer)
+    
+    dst.close()  
+    
+    return
+
+def opt_test(Z_vect): #Stop when all coff in Z are > 0
     for test in Z_vect:
         if test < 0:
             return False
@@ -146,6 +153,7 @@ def Simplex(tableu, m, n, it):
     p = pivot(tableu, m, n)
     etaV = eta_vect(tableu, m, n, p[0], p[1], p[2]) #gives eta as a row
     etaM = eta_tableu(etaV, p[1], m)
+    writeprod(etaM, tableu)
     writeTableu(etaM, m, n, 'eta Tableu')
     etaM = etaM.astype('float')
     tableu = matmul(etaM, tableu)
