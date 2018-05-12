@@ -112,17 +112,24 @@ def pivot(tableu, m, n):
     return p, p_row, p_col
     
 def eta_vect(tableu, m, n, p, p_row, p_col):
+    print('p = ', p)
     etav = np.ndarray(int(m))
     etav = etav.astype('object')
     for row in range(int(m)):
         if row == int(p_row):
-            a = int(tableu[row][int(p_col)])
-            etav[row] = Rational(1, int(p))
+            #a = int(tableu[row][int(p_col)])
+            v = 1 / int(p)
+            etav[row] = nsimplify( (v), rational=True) 
+            print(etav[row])
         else:
-            a = int(tableu[row][int(p_col)])
-            #etav[int(row)] = ( a ) / (- p)
-            etav[row] = Rational(a, int(-p) )
-
+            a = tableu[row][int(p_col)]
+            print('a = ', a)
+            etav[row] = ( a ) / (- p)
+            print('a / -p = ', etav[row]) 
+            etav[row] = nsimplify( (etav[row]), rational=True)
+            print(etav[row])
+    
+    print('\n\n')
     return etav
 
 def eta_tableu(etaV, p_row, m):
@@ -153,7 +160,7 @@ def Simplex(tableu, m, n, it):
     p = pivot(tableu, m, n)
     etaV = eta_vect(tableu, m, n, p[0], p[1], p[2]) #gives eta as a row
     etaM = eta_tableu(etaV, p[1], m)
-    writeprod(etaM, tableu)
+    #writeprod(etaM, tableu)
     writeTableu(etaM, m, n, 'eta Tableu')
     etaM = etaM.astype('float')
     tableu = matmul(etaM, tableu)
