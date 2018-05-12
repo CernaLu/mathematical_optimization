@@ -112,7 +112,6 @@ def pivot(tableu, m, n):
     return p, p_row, p_col
     
 def eta_vect(tableu, m, n, p, p_row, p_col):
-    print('p = ', p)
     etav = np.ndarray(int(m))
     etav = etav.astype('object')
     for row in range(int(m)):
@@ -120,16 +119,11 @@ def eta_vect(tableu, m, n, p, p_row, p_col):
             #a = int(tableu[row][int(p_col)])
             v = 1 / int(p)
             etav[row] = nsimplify( (v), rational=True) 
-            print(etav[row])
         else:
             a = tableu[row][int(p_col)]
-            print('a = ', a)
             etav[row] = ( a ) / (- p)
-            print('a / -p = ', etav[row]) 
             etav[row] = nsimplify( (etav[row]), rational=True)
-            print(etav[row])
     
-    print('\n\n')
     return etav
 
 def eta_tableu(etaV, p_row, m):
@@ -182,10 +176,11 @@ def Simplex(tableu, m, n, it):
 os.system('> output.txt')
 table = np.ndarray( (20,20) ) 
 
-table = np.loadtxt("file.txt", dtype=float, comments='#', delimiter=" ")
-m = table[0][0]
-n = table[1][0]
-table = table[2:]
+#table = np.loadtxt("file.txt", dtype=float, delimiter=" ")
+table = np.genfromtxt("input.txt", dtype=float, comments='#', skip_header=2 ,delimiter=' ') 
+shape = np.genfromtxt("input.txt", dtype=float, comments='#', usecols=(0) , max_rows=2 ) 
+m = shape[0]
+n = shape[1]
 tableu = incrementedTableu(table, m, n)
 
 n = (n-1) + m #Now n has the incremented tableu size, not the original
