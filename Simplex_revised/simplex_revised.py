@@ -152,19 +152,25 @@ def matmul(A, B):
 def get_vars(tableu, m, n, dst):
     k = int(int(n)-int(m))
     K = np.ndarray( [k,1] )
+    X = np.ndarray( [k,1] )
     K = K.astype('object')
+    X = X.astype('object')
     for j in range(k):
-        K[j,0] = 0 
+        K[j,0] = '0 '
+        X[j,0] = '[ X_' + str(j+1) + ' ] = [ '
         n_ceros = 0
         for i in range(int(m)):
             if tableu[i][j] == 0:
                 n_ceros +=1
             if n_ceros == int(m-1):
-                K[j,0] = tableu[i][int(n)-1]
+                K[j,0] = str(tableu[i][int(n)-1]) +  ' '
                 n_ceros = 0
-                
-    #K = K.astype('object')
-    dst.writelines(str(K))
+    
+    dst.writelines('OPTIMIZATION FINISHED.\n\n Values of variables that optimizes our objective function:\n\n')
+    string = np.c_[X, K]
+    string = string.astype('object')
+    dst.writelines( str(string) )
+    dst.writelines('\n\nThe optimal value of Z is: ')
     return
 
 def Simplex(tableu, m, n, it):
@@ -172,11 +178,12 @@ def Simplex(tableu, m, n, it):
     etaV = eta_vect(tableu, m, n, p[0], p[1], p[2]) #gives eta as a row
     etaM = eta_tableu(etaV, p[1], m)
     #writeprod(etaM, tableu)
-    writeTableu(etaM, m, n, 'eta Tableu')
+    mess = 'Iteration ' + str(it) + '\n\nPivot = ' + str(p[0]) + '\nRow: ' + str(p[1]) + '\nCol: ' + str(p[2]) + '\n\neta matrix'
+    writeTableu(etaM, m, n, mess)
     etaM = etaM.astype('float')
     tableu = matmul(etaM, tableu)
-    mess = 'Iteration ' + str(it)
-    writeTableu(tableu, m, n, mess)
+    
+    writeTableu(tableu, m, n, ' (eta matrix) x (tableu) ')
     it += 1
 
     t = opt_test(tableu[0])
