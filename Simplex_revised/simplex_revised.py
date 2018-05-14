@@ -149,6 +149,24 @@ def matmul(A, B):
     
     return c
 
+def get_vars(tableu, m, n, dst):
+    k = int(int(n)-int(m))
+    K = np.ndarray( [k,1] )
+    K = K.astype('object')
+    for j in range(k):
+        K[j,0] = 0 
+        n_ceros = 0
+        for i in range(int(m)):
+            if tableu[i][j] == 0:
+                n_ceros +=1
+            if n_ceros == int(m-1):
+                K[j,0] = tableu[i][int(n)-1]
+                n_ceros = 0
+                
+    #K = K.astype('object')
+    dst.writelines(str(K))
+    return
+
 def Simplex(tableu, m, n, it):
     p = pivot(tableu, m, n)
     etaV = eta_vect(tableu, m, n, p[0], p[1], p[2]) #gives eta as a row
@@ -166,6 +184,7 @@ def Simplex(tableu, m, n, it):
         Simplex(tableu, m, n, it)
     else:
         dst = open('output.txt', 'a')
+        get_vars(tableu, m, n, dst)
         Z = tableu[0][int(n)-1]
         dst.writelines( ('Zopt = ', str(Z)) )
         dst.close()
