@@ -151,7 +151,6 @@ def matmul(A, B):
 
 def Simplex(tableu, m, n, it):
     p = pivot(tableu, m, n)
-    print('pivot =', p)
     etaV = eta_vect(tableu, m, n, p[0], p[1], p[2]) #gives eta as a row
     etaM = eta_tableu(etaV, p[1], m)
     #writeprod(etaM, tableu)
@@ -185,7 +184,6 @@ tableu = incrementedTableu(table, m, n)
 
 n = (n-1) + m #Now n has the incremented tableu size, not the original
 writeTableu(tableu, m, n, "\nIteration 0")
-print (tableu)
 Simplex(tableu, m, n, 1)
 
 #size = np.fromfile("file.txt", dtype = float, count = 2, sep = " ")
