@@ -5,14 +5,6 @@ import os
 from sympy import *
 from decimal import Decimal
 
-# HAVE TO PRINT eta*tableu IN OUTPUT.TXT
-# ALSO think about how to print variables value
-
-    # It's important not to stay in an infinit cycle that could
-    # happen if there are repeated pivots. Code should be
-    # able to identify and pick the next pivot, even if it
-    # has the same value
-
 def getconst(table, i, j):
     m = int(i)
     n = int(j)
@@ -58,12 +50,6 @@ def incrementedTableu(table, m, n):
     return tableu
     
 def writeTableu(tableu, m, n, mess):
-    #size = tableu.shape
-    #tableu = tableu.astype('object') #try removing 
-    #for i in range(int(size[0])):
-    #    for j in range(int(size[1])):
-    #        tableu[i][j] = tableu[i][j]
-    
     header = mess + ' ' + int(9*n)*'_' + '\n'
     footer = int(12*n) * '-' + '\n'
     dst = open('output.txt', 'a')
@@ -72,15 +58,6 @@ def writeTableu(tableu, m, n, mess):
     dst.close() 
     return
 
-def writeprod(etaM, tableu): #Product needs a separation :(
-    header = int(9*n)*'_' + '\n'
-    footer = int(12*n) * '-' + '\n'
-    dst = open('output.txt', 'a')
-    np.savetxt(dst, np.c_[etaM, tableu], fmt='%5s', delimiter=' ', newline='\n', header=header, footer=footer)
-    
-    dst.close()  
-    
-    return
 
 def opt_test(Z_vect): #Stop when all coff in Z are > 0
     for test in Z_vect:
@@ -116,7 +93,6 @@ def eta_vect(tableu, m, n, p, p_row, p_col):
     etav = etav.astype('object')
     for row in range(int(m)):
         if row == int(p_row):
-            #a = int(tableu[row][int(p_col)])
             v = 1 / p
             etav[row] = nsimplify( (v), rational=True) 
         else:
@@ -166,7 +142,8 @@ def get_vars(tableu, m, n, dst):
                 K[j,0] = str(tableu[i][int(n)-1]) +  ' '
                 n_ceros = 0
     
-    dst.writelines('OPTIMIZATION FINISHED.\n\n Values of variables that optimizes our objective function:\n\n')
+    dst.writelines('OPTIMIZATION FINISHED.\n\nValues of variables that '\
+                    'optimizes our objective function:\n\n')
     string = np.c_[X, K]
     string = string.astype('object')
     dst.writelines( str(string) )
@@ -178,7 +155,9 @@ def Simplex(tableu, m, n, it):
     etaV = eta_vect(tableu, m, n, p[0], p[1], p[2]) #gives eta as a row
     etaM = eta_tableu(etaV, p[1], m)
     #writeprod(etaM, tableu)
-    mess = 'Iteration ' + str(it) + '\n\nPivot = ' + str(p[0]) + '\nRow: ' + str(p[1]) + '\nCol: ' + str(p[2]) + '\n\neta matrix'
+    mess = 'Iteration ' + str(it) + '\n\nPivot = ' + str(p[0]) \
+            + '\nRow: ' + str(p[1]) + '\nCol: ' + str(p[2]) \
+            + '\n\neta matrix'
     writeTableu(etaM, m, n, mess)
     etaM = etaM.astype('float')
     tableu = matmul(etaM, tableu)
@@ -201,9 +180,10 @@ def Simplex(tableu, m, n, it):
 os.system('> output.txt')
 table = np.ndarray( (20,20) ) 
 
-#table = np.loadtxt("file.txt", dtype=float, delimiter=" ")
-table = np.genfromtxt("input.txt", dtype=float, comments='#', skip_header=2 ,delimiter=' ') 
-shape = np.genfromtxt("input.txt", dtype=float, comments='#', usecols=(0) , max_rows=2 ) 
+table = np.genfromtxt("input.txt", dtype=float, comments='#',\
+                        skip_header=2 ,delimiter=' ') 
+shape = np.genfromtxt("input.txt", dtype=float, comments='#',\
+                        usecols=(0) , max_rows=2 ) 
 m = shape[0]
 n = shape[1]
 tableu = incrementedTableu(table, m, n)
@@ -212,6 +192,3 @@ n = (n-1) + m #Now n has the incremented tableu size, not the original
 writeTableu(tableu, m, n, "\nIteration 0")
 Simplex(tableu, m, n, 1)
 
-#size = np.fromfile("file.txt", dtype = float, count = 2, sep = " ")
-#tableu = np.fromfile("file.txt", dtype = float, count = -1, sep = " ")
-#tableu = tableu[2:]
