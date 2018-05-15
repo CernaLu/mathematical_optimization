@@ -11,9 +11,7 @@ def getconst(table, m, n):
 
     return b
 
-def hsplit(table, i, j):
-    m = int(i)
-    n = int(j)
+def hsplit(table, m, n):
     tableu = np.ndarray( [m,n-1] )
     for row in range(m):
         for col in range(n-1):
@@ -131,12 +129,16 @@ def get_vars(tableu, m, n, dst):
         Cts[col,0] = '0 '
         X[col,0] = '[ X_' + str(col+1) + ' ] = [ '
         ceros_count = 0
+        x_row = 0
         for row in range(m):
             if tableu[row][col] == 0:
                 ceros_count += 1
-            if ceros_count == m-1:
-                Cts[col,0] = str(tableu[row][n-1]) +  ' '
-                ceros_count = 0
+            if tableu[row][col] == 1:
+                x_row = row
+            if row == m-1:
+                if ceros_count == m - 1:
+                    Cts[col,0] = str(tableu[x_row][n-1]) +  ' '
+                    ceros_count = 0
     
     dst.writelines('OPTIMIZATION FINISHED.\n\nValues of variables that '\
                     'optimizes our objective function:\n\n')

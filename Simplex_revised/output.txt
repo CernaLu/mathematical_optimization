@@ -51,9 +51,9 @@ OPTIMIZATION FINISHED.
 Values of variables that optimizes our objective function:
 
 [['[ X_1 ] = [ ' '0 ']
- ['[ X_2 ] = [ ' '5/2 ']
+ ['[ X_2 ] = [ ' '5 ']
  ['[ X_3 ] = [ ' '0 ']
- ['[ X_4 ] = [ ' '5 ']
+ ['[ X_4 ] = [ ' '5/2 ']
  ['[ X_5 ] = [ ' '0 ']]
 
 The optimal value of Z is: Zopt = 50
