@@ -45,10 +45,11 @@ def incrementedTableu(table, m, n):
     return tableu
     
 def writeTableu(tableu, m, n, mess):
-    header = mess + ' ' + int(9*n)*'_' + '\n'
-    footer = int(12*n) * '-' + '\n'
+    header = mess + ' ' + (9*n) *'_' + '\n'
+    footer = (12*n) * '-' + '\n'
     dst = open('output.txt', 'a')
-    np.savetxt(dst, tableu, fmt='%5s', delimiter=' ', newline='\n', header=header, footer=footer)
+    np.savetxt(dst, tableu, fmt='%5s', delimiter=' ', \
+                newline='\n', header=header, footer=footer)
     
     dst.close() 
     return
@@ -64,10 +65,10 @@ def opt_test(Z_vect): #Stop when all coff in Z are > 0
 def pivot(tableu, m, n):
     table = tableu[0]
     table = table[:-1]
-    p_col = np.argmin(table)  
+    p_col = int(np.argmin(table))
     i = True
     for row in range(1, m, 1):
-        buffer = tableu[row][int(p_col)]
+        buffer = tableu[row][p_col]
         b = tableu[row][n-1]
         if (buffer > 0):
             buff_test = b / buffer
@@ -87,11 +88,11 @@ def eta_vect(tableu, m, n, p, p_row, p_col):
     etav = np.ndarray(m)
     etav = etav.astype('object')
     for row in range(m):
-        if row == int(p_row):
+        if row == p_row:
             v = 1 / p
             etav[row] = nsimplify( v, rational=True) 
         else:
-            a = tableu[row][int(p_col)]
+            a = tableu[row][p_col]
             etav[row] = ( a ) / (- p)
             etav[row] = nsimplify( etav[row], rational=True)
     
@@ -101,7 +102,7 @@ def eta_tableu(etaV, p_row, m):
     etaM = np.identity( m )
     etaM = etaM.astype('object')
     for row in range(m):
-        etaM[row][int(p_row)] = nsimplify( etaV[row], rational=True)
+        etaM[row][p_row] = nsimplify( etaV[row], rational=True)
 
     return etaM
 
@@ -156,7 +157,7 @@ def Simplex(tableu, m, n, it):
             + '\nRow: ' + str(p[1]) + '\nCol: ' + str(p[2]) \
             + '\n\neta matrix'
     writeTableu(etaM, m, n, mess)
-    etaM = etaM.astype('float')
+    #etaM = etaM.astype('float')
     tableu = matmul(etaM, tableu)
     
     writeTableu(tableu, m, n, ' (eta matrix) x (tableu) ')
@@ -175,12 +176,10 @@ def Simplex(tableu, m, n, it):
 
 ################################## MAIN PROGRAM
 os.system('> output.txt')
-table = np.genfromtxt("input.txt", dtype=float, comments='#',\
-                        skip_header=2 ,delimiter=' ') 
-shape = np.genfromtxt("input.txt", dtype=float, comments='#',\
-                        usecols=(0) , max_rows=2 ) 
-m = int(shape[0])
-k = int(shape[1])
+table = np.genfromtxt("input.txt", dtype=float, comments='#', delimiter=' ') 
+size = table.shape
+m = size[0]
+k = size[1]
 tableu = incrementedTableu(table, m, k)
 
 n = (k-1) + m       #incremented tableu size columns
