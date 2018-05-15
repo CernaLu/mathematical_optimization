@@ -2,12 +2,9 @@ import sys
 import numpy as np
 import argparse as parse
 import os
-from sympy import *
-from decimal import Decimal
+from sympy import nsimplify
 
-def getconst(table, i, j):
-    m = int(i)
-    n = int(j)
+def getconst(table, m, n):
     b = np.ndarray( [m,1] )
     for row in range(m):
         b[row][0] = table[row][n-1]
@@ -43,7 +40,7 @@ def hstack(A, B):
 def incrementedTableu(table, m, n):
     b = getconst(table, m, n)
     table = hsplit(table, m, n)
-    identity = np.vstack( (np.zeros( (1, int(m)-1) ), np.identity( int(m)-1 )) )
+    identity = np.vstack( (np.zeros( (1, m-1) ), np.identity( m-1 )) )
     identity_b = np.hstack( [identity, b] )
     tableu = hstack(table, identity_b)
     
@@ -71,9 +68,9 @@ def pivot(tableu, m, n):
     table = table[:-1]
     p_col = np.argmin(table)  
     i = True
-    for row in range(1, int(m), 1):
+    for row in range(1, m, 1):
         buffer = tableu[row][int(p_col)]
-        b = tableu[row][int(n)-1]
+        b = tableu[row][n-1]
         if (buffer > 0):
             buff_test = b / buffer
             if i == True:
@@ -89,24 +86,24 @@ def pivot(tableu, m, n):
     return p, p_row, p_col
     
 def eta_vect(tableu, m, n, p, p_row, p_col):
-    etav = np.ndarray(int(m))
+    etav = np.ndarray(m)
     etav = etav.astype('object')
-    for row in range(int(m)):
+    for row in range(m):
         if row == int(p_row):
             v = 1 / p
-            etav[row] = nsimplify( (v), rational=True) 
+            etav[row] = nsimplify( v, rational=True) 
         else:
             a = tableu[row][int(p_col)]
             etav[row] = ( a ) / (- p)
-            etav[row] = nsimplify( (etav[row]), rational=True)
+            etav[row] = nsimplify( etav[row], rational=True)
     
     return etav
 
 def eta_tableu(etaV, p_row, m):
-    etaM = np.identity( int(m) )
+    etaM = np.identity( m )
     etaM = etaM.astype('object')
-    for row in range(int(m)):
-        etaM[row][int(p_row)] = Rational(etaV[row])
+    for row in range(m):
+        etaM[row][int(p_row)] = nsimplify( etaV[row], rational=True)
 
     return etaM
 
@@ -126,25 +123,24 @@ def matmul(A, B):
     return c
 
 def get_vars(tableu, m, n, dst):
-    k = int(int(n)-int(m))
-    K = np.ndarray( [k,1] )
-    X = np.ndarray( [k,1] )
-    K = K.astype('object')
-    X = X.astype('object')
-    for j in range(k):
-        K[j,0] = '0 '
-        X[j,0] = '[ X_' + str(j+1) + ' ] = [ '
-        n_ceros = 0
-        for i in range(int(m)):
-            if tableu[i][j] == 0:
-                n_ceros +=1
-            if n_ceros == int(m-1):
-                K[j,0] = str(tableu[i][int(n)-1]) +  ' '
-                n_ceros = 0
+    k = n - m
+    Cts, X = np.ndarray( [k,1] ), np.ndarray( [k,1] )
+    Cts, X = Cts.astype('object'), X.astype('object')
+    
+    for col in range(k): 
+        Cts[col,0] = '0 '
+        X[col,0] = '[ X_' + str(col+1) + ' ] = [ '
+        ceros_count = 0
+        for row in range(m):
+            if tableu[row][col] == 0:
+                ceros_count += 1
+            if ceros_count == m-1:
+                Cts[col,0] = str(tableu[row][n-1]) +  ' '
+                ceros_count = 0
     
     dst.writelines('OPTIMIZATION FINISHED.\n\nValues of variables that '\
                     'optimizes our objective function:\n\n')
-    string = np.c_[X, K]
+    string = np.c_[X, Cts]
     string = string.astype('object')
     dst.writelines( str(string) )
     dst.writelines('\n\nThe optimal value of Z is: ')
@@ -152,9 +148,8 @@ def get_vars(tableu, m, n, dst):
 
 def Simplex(tableu, m, n, it):
     p = pivot(tableu, m, n)
-    etaV = eta_vect(tableu, m, n, p[0], p[1], p[2]) #gives eta as a row
+    etaV = eta_vect(tableu, m, n, p[0], p[1], p[2]) 
     etaM = eta_tableu(etaV, p[1], m)
-    #writeprod(etaM, tableu)
     mess = 'Iteration ' + str(it) + '\n\nPivot = ' + str(p[0]) \
             + '\nRow: ' + str(p[1]) + '\nCol: ' + str(p[2]) \
             + '\n\neta matrix'
@@ -164,31 +159,29 @@ def Simplex(tableu, m, n, it):
     
     writeTableu(tableu, m, n, ' (eta matrix) x (tableu) ')
     it += 1
-
+    
     t = opt_test(tableu[0])
     if t == False:
         Simplex(tableu, m, n, it)
     else:
         dst = open('output.txt', 'a')
         get_vars(tableu, m, n, dst)
-        Z = tableu[0][int(n)-1]
+        Z = tableu[0][n-1]
         dst.writelines( ('Zopt = ', str(Z)) )
         dst.close()
         return 
 
 ################################## MAIN PROGRAM
 os.system('> output.txt')
-table = np.ndarray( (20,20) ) 
-
 table = np.genfromtxt("input.txt", dtype=float, comments='#',\
                         skip_header=2 ,delimiter=' ') 
 shape = np.genfromtxt("input.txt", dtype=float, comments='#',\
                         usecols=(0) , max_rows=2 ) 
-m = shape[0]
-n = shape[1]
-tableu = incrementedTableu(table, m, n)
+m = int(shape[0])
+k = int(shape[1])
+tableu = incrementedTableu(table, m, k)
 
-n = (n-1) + m #Now n has the incremented tableu size, not the original
+n = (k-1) + m       #incremented tableu size columns
 writeTableu(tableu, m, n, "\nIteration 0")
 Simplex(tableu, m, n, 1)
 
