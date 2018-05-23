@@ -54,7 +54,6 @@ def writeTableu(tableu, m, n, mess):
     dst.close() 
     return
 
-
 def opt_test(Z_vect): #Stop when all coff in Z are > 0
     for test in Z_vect:
         if test < 0:
@@ -157,7 +156,6 @@ def Simplex(tableu, m, n, it):
             + '\nRow: ' + str(p[1]) + '\nCol: ' + str(p[2]) \
             + '\n\neta matrix'
     writeTableu(etaM, m, n, mess)
-    #etaM = etaM.astype('float')
     tableu = matmul(etaM, tableu)
     
     writeTableu(tableu, m, n, ' (eta matrix) x (tableu) ')
@@ -173,13 +171,78 @@ def Simplex(tableu, m, n, it):
         dst.writelines( ('Zopt = ', str(Z)) )
         dst.close()
         return 
+    
+def take_simbols(table, m, n):
+    simbols = ['' for i in range(m)]
+    col = n-2
+    for row in range(m-1):
+        simbols[row] = str(table[row+1][col])
+
+    return simbols
+    
+def check_(simbols, m, n):
+    count = 0
+    for i in range(m-1):
+        if simbols[i] == '<=':
+            count += 1
+    
+    if count == m-1:
+        return True
+    else:
+        return False
+
+def remove_simbols(table, n):
+    tableu = np.delete(table, n-2, 1)
+
+    return tableu
+
+def dual_method(table, m, old_n):
+    table = remove_simbols(table,old_n)
+    n = old_n - 1
+    constants = np.transpose( getconst(table, m, n) )
+    constants = np.delete(constants, 0)
+    Z_dual = np.negative(constants)
+    b_dual = np.delete(table, np.s_[1:], axis=0)
+    b_dual = np.delete(b_dual, n-1, axis=1)
+    b_dual = np.insert(b_dual, 0, 0, axis=1)
+    b_dual = np.transpose(b_dual)
+    b_dual = b_dual.astype('float')
+    b_dual = np.negative(b_dual)
+    buffer_table = np.delete(table, 0, axis=0)
+    buffer_table = np.delete(buffer_table, n-1, axis=1)
+    transposed_buff = np.transpose(buffer_table)
+    tableu = np.vstack((Z_dual,transposed_buff))
+    tableu = np.hstack((tableu,b_dual))
+
+    return tableu
+
+def manage_input(optimization, table, shape):
+    m = int(shape[0])
+    n = int(shape[1])
+    simbols = take_simbols(table,m,n)
+    check = check_(simbols,m,n)
+    if check == True:
+        if optimization == 'Max':
+            tableu = remove_simbols(table,n)
+            return tableu
+        if optimization == 'Min':
+            dual_tableu = dual_method(table, m, n)
+            return dual_tableu
+    else:
+        dual_tableu = dual_method(table, m, n)
+        return dual_tableu
 
 ################################## MAIN PROGRAM
 os.system('> output.txt')
-table = np.genfromtxt("input.txt", dtype=float, comments='#', delimiter=' ') 
-size = table.shape
-m = size[0]
-k = size[1]
+optimization_type = np.genfromtxt("input.txt", dtype=str, max_rows=1, comments='#', delimiter=' ') 
+input_ = np.genfromtxt("input.txt", dtype=str, skip_header=1, comments='#', delimiter=' ')
+
+str_shape = input_.shape
+table = manage_input(optimization_type, input_, str_shape)
+
+shape = table.shape
+m = shape[0]
+k = shape[1]
 tableu = incrementedTableu(table, m, k)
 
 n = (k-1) + m       #incremented tableu size columns

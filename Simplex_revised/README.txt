@@ -1,4 +1,4 @@
-Luis E. Cerna
+Luis E. Cerna & Montserrat De Guadalpe Rivera Ortiz
 Universidad de Guanajuato
 Engeneering Physics Undergraduate
 Cernalue@gmail.com
@@ -14,12 +14,12 @@ ____________________________
     input to the file must be like the next 
     example: (strings after '#' are comments)
     
-        3    #number of rows
-        6    #number of columns   
-        -5 -8 -7 -4 -6 0  #Z function 
-        2 3 3 2 2 20      #Restriction 1
+        -5 -8 -7 -4 -6 0  #Z function
+        2 3 3 2 2 20      #Restriction 
         3 5 4 2 4 30      #Restriction 1
         
+    Where the last column of each row corresponds
+    to the constants on every equation.
     Everything after '#' are also comments for
     the implementation, so this wouldn't affect
     when running.
