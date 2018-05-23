@@ -49,7 +49,8 @@ def writeTableu(tableu, m, n, mess):
     footer = (12*n) * '-' + '\n'
     dst = open('output.txt', 'a')
     np.savetxt(dst, tableu, fmt='%5s', delimiter=' ', \
-                newline='\n', header=header, footer=footer)
+                newline='\n', header=header, footer=footer, \
+                comments='')
     
     dst.close() 
     return
@@ -234,8 +235,9 @@ def manage_input(optimization, table, shape):
 
 ################################## MAIN PROGRAM
 os.system('> output.txt')
-optimization_type = np.genfromtxt("input.txt", dtype=str, max_rows=1, comments='#', delimiter=' ') 
-input_ = np.genfromtxt("input.txt", dtype=str, skip_header=1, comments='#', delimiter=' ')
+srcfile = sys.argv[1]
+optimization_type = np.genfromtxt(srcfile, dtype=str, max_rows=1, comments='#', delimiter=' ') 
+input_ = np.genfromtxt(srcfile, dtype=str, skip_header=1, comments='#', delimiter=' ')
 
 str_shape = input_.shape
 table = manage_input(optimization_type, input_, str_shape)
