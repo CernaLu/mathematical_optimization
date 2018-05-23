@@ -148,8 +148,30 @@ def get_vars(tableu, m, n, dst):
     dst.writelines( str(string) )
     dst.writelines('\n\nThe optimal value of Z is: ')
     return
+    
+def get_dual_vars(tableu, m, n, dst):
+    k = (n-m) + 1
+    #sol = tableu[0]
+    sol = np.delete(tableu, np.s_[:k-1], axis=-1)
+    sol = np.delete(sol, np.s_[1:], axis=0)
+    sol = np.delete(sol, np.s_[k-2:], axis=-1)
+    sol = np.transpose(sol)
+    
+    X = np.ndarray( [k-2,1] )
+    X = X.astype('object')
+    print(X)
+    for row in range(k-2):
+        X[row,0] = '[ X_' + str(row+1) + ' ] = [ '
+    
+    dst.writelines('OPTIMIZATION FINISHED.\n\nValues of variables that '\
+                    'optimizes our objective function:\n\n')
+    string = np.c_[X, sol]
+    string = string.astype('object')
+    dst.writelines( str(string) )
+    dst.writelines('\n\nThe optimal value of Z is: ')    
+    return sol
 
-def Simplex(tableu, m, n, it):
+def Simplex(tableu, m, n, it, type_of_prob):
     p = pivot(tableu, m, n)
     etaV = eta_vect(tableu, m, n, p[0], p[1], p[2]) 
     etaM = eta_tableu(etaV, p[1], m)
@@ -164,10 +186,13 @@ def Simplex(tableu, m, n, it):
     
     t = opt_test(tableu[0])
     if t == False:
-        Simplex(tableu, m, n, it)
+        Simplex(tableu, m, n, it, type_of_prob)
     else:
         dst = open('output.txt', 'a')
-        get_vars(tableu, m, n, dst)
+        if type_of_prob == 'normal':
+            get_vars(tableu, m, n, dst)
+        elif type_of_prob == 'dual':
+            get_dual_vars(tableu, m, n, dst)
         Z = tableu[0][n-1]
         dst.writelines( ('Zopt = ', str(Z)) )
         dst.close()
@@ -205,16 +230,18 @@ def dual_method(table, m, old_n):
     Z_dual = np.negative(constants)
     b_dual = np.delete(table, np.s_[1:], axis=0)
     b_dual = np.delete(b_dual, n-1, axis=1)
-    b_dual = np.insert(b_dual, 0, 0, axis=1)
+    #b_dual = np.insert(b_dual, 0, 0, axis=1)
     b_dual = np.transpose(b_dual)
     b_dual = b_dual.astype('float')
     b_dual = np.negative(b_dual)
+    b_dual = np.insert(b_dual, 0, 0, axis=1)
+    print(b_dual)
     buffer_table = np.delete(table, 0, axis=0)
     buffer_table = np.delete(buffer_table, n-1, axis=1)
     transposed_buff = np.transpose(buffer_table)
     tableu = np.vstack((Z_dual,transposed_buff))
     tableu = np.hstack((tableu,b_dual))
-
+    print(tableu)
     return tableu
 
 def manage_input(optimization, table, shape):
@@ -225,13 +252,13 @@ def manage_input(optimization, table, shape):
     if check == True:
         if optimization == 'Max':
             tableu = remove_simbols(table,n)
-            return tableu
+            return 'normal', tableu
         if optimization == 'Min':
             dual_tableu = dual_method(table, m, n)
-            return dual_tableu
+            return 'dual', dual_tableu
     else:
         dual_tableu = dual_method(table, m, n)
-        return dual_tableu
+        return 'dual', dual_tableu
 
 ################################## MAIN PROGRAM
 os.system('> output.txt')
@@ -240,7 +267,7 @@ optimization_type = np.genfromtxt(srcfile, dtype=str, max_rows=1, comments='#', 
 input_ = np.genfromtxt(srcfile, dtype=str, skip_header=1, comments='#', delimiter=' ')
 
 str_shape = input_.shape
-table = manage_input(optimization_type, input_, str_shape)
+type_of_prob, table = manage_input(optimization_type, input_, str_shape)
 
 shape = table.shape
 m = shape[0]
@@ -249,5 +276,5 @@ tableu = incrementedTableu(table, m, k)
 
 n = (k-1) + m       #incremented tableu size columns
 writeTableu(tableu, m, n, "\nIteration 0")
-Simplex(tableu, m, n, 1)
+#Simplex(tableu, m, n, 1, type_of_prob)
 
