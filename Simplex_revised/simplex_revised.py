@@ -224,9 +224,9 @@ def check_min(table, simbols, m):
             count += 1
             if count == m-1:
                 return table
-        else:
-            ones[i+1] = ones[i+1]*(-1)
-    
+        else:                           ## THIS ISN'T WORKING
+            ones[i+1] = ones[i+1]*(1)   ## MUST CHECK THIS WHOLE 
+                                        ## FUNCTION (the signs)
     ones = np.diag(ones)
     C = np.matmul(ones, table.astype('float'))
     return C
@@ -290,4 +290,3 @@ tableu = incrementedTableu(table, m, k)
 n = (k-1) + m       #incremented tableu size columns
 writeTableu(tableu, m, n, "\nIteration 0")
 Simplex(tableu, m, n, 1, type_of_prob)
-
