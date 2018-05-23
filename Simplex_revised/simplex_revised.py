@@ -159,7 +159,6 @@ def get_dual_vars(tableu, m, n, dst):
     
     X = np.ndarray( [k-2,1] )
     X = X.astype('object')
-    print(X)
     for row in range(k-2):
         X[row,0] = '[ X_' + str(row+1) + ' ] = [ '
     
@@ -216,37 +215,47 @@ def check_(simbols, m, n):
         return True
     else:
         return False
+        
+def check_min(table, simbols, m):
+    ones = np.ones([m])
+    count = 0
+    for i in range(m-1):
+        if simbols[i] == '>=':
+            count += 1
+            if count == m-1:
+                return table
+        elif simbols[i] == '<=':
+            ones[i+1] = ones[i+1]*(-1)
+    
+    ones = np.diag(ones)
+    C = np.matmul(ones, table.astype('float'))
+    return C
 
 def remove_simbols(table, n):
     tableu = np.delete(table, n-2, 1)
 
     return tableu
 
-def dual_method(table, m, old_n):
-    table = remove_simbols(table,old_n)
-    n = old_n - 1
+def dual_method(table, m, n):
     constants = np.transpose( getconst(table, m, n) )
     constants = np.delete(constants, 0)
     Z_dual = np.negative(constants)
     b_dual = np.delete(table, np.s_[1:], axis=0)
     b_dual = np.delete(b_dual, n-1, axis=1)
-    #b_dual = np.insert(b_dual, 0, 0, axis=1)
+    b_dual = np.insert(b_dual, 0, 0, axis=1)
     b_dual = np.transpose(b_dual)
     b_dual = b_dual.astype('float')
     b_dual = np.negative(b_dual)
-    b_dual = np.insert(b_dual, 0, 0, axis=1)
-    print(b_dual)
     buffer_table = np.delete(table, 0, axis=0)
     buffer_table = np.delete(buffer_table, n-1, axis=1)
     transposed_buff = np.transpose(buffer_table)
     tableu = np.vstack((Z_dual,transposed_buff))
     tableu = np.hstack((tableu,b_dual))
-    print(tableu)
     return tableu
 
 def manage_input(optimization, table, shape):
     m = int(shape[0])
-    n = int(shape[1])
+    n = int(shape[1]) #this n contains also the simbols
     simbols = take_simbols(table,m,n)
     check = check_(simbols,m,n)
     if check == True:
@@ -254,10 +263,14 @@ def manage_input(optimization, table, shape):
             tableu = remove_simbols(table,n)
             return 'normal', tableu
         if optimization == 'Min':
-            dual_tableu = dual_method(table, m, n)
+            tablu = remove_simbols(table,n)
+            tablu = check_min(tableu, simbols, m)
+            dual_tableu = dual_method(tablu, m, n-1)
             return 'dual', dual_tableu
     else:
-        dual_tableu = dual_method(table, m, n)
+        tablu = remove_simbols(table,n)
+        tablu = check_min(tablu, simbols, m)
+        dual_tableu = dual_method(tablu, m, n-1)
         return 'dual', dual_tableu
 
 ################################## MAIN PROGRAM
@@ -276,5 +289,5 @@ tableu = incrementedTableu(table, m, k)
 
 n = (k-1) + m       #incremented tableu size columns
 writeTableu(tableu, m, n, "\nIteration 0")
-#Simplex(tableu, m, n, 1, type_of_prob)
+Simplex(tableu, m, n, 1, type_of_prob)
 
