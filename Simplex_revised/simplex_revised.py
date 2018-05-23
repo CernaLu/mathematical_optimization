@@ -205,7 +205,7 @@ def take_simbols(table, m, n):
 
     return simbols
     
-def check_(simbols, m, n):
+def check_simbols(simbols, m, n):
     count = 0
     for i in range(m-1):
         if simbols[i] == '<=':
@@ -220,11 +220,11 @@ def check_min(table, simbols, m):
     ones = np.ones([m])
     count = 0
     for i in range(m-1):
-        if simbols[i] == '>=':
+        if simbols[i] == '<=':
             count += 1
             if count == m-1:
                 return table
-        elif simbols[i] == '<=':
+        else:
             ones[i+1] = ones[i+1]*(-1)
     
     ones = np.diag(ones)
@@ -257,14 +257,14 @@ def manage_input(optimization, table, shape):
     m = int(shape[0])
     n = int(shape[1]) #this n contains also the simbols
     simbols = take_simbols(table,m,n)
-    check = check_(simbols,m,n)
+    check = check_simbols(simbols,m,n)
     if check == True:
         if optimization == 'Max':
             tableu = remove_simbols(table,n)
             return 'normal', tableu
         if optimization == 'Min':
             tablu = remove_simbols(table,n)
-            tablu = check_min(tableu, simbols, m)
+            tablu = check_min(tablu, simbols, m)
             dual_tableu = dual_method(tablu, m, n-1)
             return 'dual', dual_tableu
     else:
